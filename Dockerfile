@@ -28,4 +28,4 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 EXPOSE 80
 
 # Start command: Migrate and Start Apache
-CMD php artisan migrate --force && apache2-foreground
+CMD php artisan migrate:fresh --force && apache2-foreground
