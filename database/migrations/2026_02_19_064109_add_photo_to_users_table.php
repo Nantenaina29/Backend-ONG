@@ -9,13 +9,16 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->text('photo')->nullable()->change()->after('role');
+            // Esorina ilay ->change() satria vao hamorona isika fa tsy hanova
+            $table->text('photo')->nullable()->after('role');
         });
     }
+
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //
+            // Tsara raha fafana ilay column raha sendra manao rollback
+            $table->dropColumn('photo');
         });
     }
 };
