@@ -32,13 +32,13 @@
             "Tests\\": "tests/"
         }
     },
-"scripts": {
-    "post-autoloader-dump": [
-        "Illuminate\\Foundation\\ComposerScripts::postAutoloaderDump",
-        "@php artisan package:discover --ansi",
-        "@php artisan migrate --force" 
-    ]
-},
+        "scripts": {
+            "post-autoloader-dump": [
+                "Illuminate\\Foundation\\ComposerScripts::postAutoloaderDump",
+                "@php artisan package:discover --ansi",
+                "@php artisan migrate --force" 
+            ]
+        },
     "extra": {
         "laravel": {
             "dont-discover": []
