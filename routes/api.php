@@ -12,6 +12,7 @@ use App\Http\Controllers\FormationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TrashController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Artisan;
 
 
 
@@ -103,6 +104,11 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/{table}/{id}/restore', [TrashController::class, 'restore']); // Famerenana
             Route::delete('/{table}/{id}/force', [TrashController::class, 'forceDelete']); // Famafana tanteraka
         });
+});
+
+Route::get('/init-db', function () {
+    Artisan::call('migrate', ['--force' => true]);
+    return "Database efa vonona!";
 });
 
 
