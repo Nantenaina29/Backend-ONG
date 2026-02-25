@@ -5,12 +5,7 @@ use Laravel\Sanctum\Sanctum;
 return [
 
 
-'stateful' => [
-    'frontend-ong-puce.vercel.app',
-    'backend-ong-qarl.onrender.com',
-    'localhost',
-    '127.0.0.1',
-],
+'stateful' => [ 'frontend-ong-puce.vercel.app'],
 
     'guard' => ['web'],
 
