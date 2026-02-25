@@ -21,8 +21,8 @@ use Illuminate\Support\Facades\Artisan;
 | AUTH Routes (Public)
 |--------------------------------------------------------------------------
 */
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/register', [AuthController::class, 'register']);
+/*Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/register', [AuthController::class, 'register']);*/
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
 
