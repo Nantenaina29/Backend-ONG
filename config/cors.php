@@ -3,10 +3,7 @@
 return [
         'paths' => ['api/*', 'sanctum/csrf-cookie'],
         'allowed_methods' => ['*'],
-        'allowed_origins' => [
-            'https://frontend-ong-puce.vercel.app',
-            'https://frontend-ong-nantenaina29s-projects.vercel.app', 
-        ],
+        'allowed_origins' => ['https://frontend-ong-puce.vercel.app'],
         'allowed_origins_patterns' => [],
         'allowed_headers' => ['*'],
         'exposed_headers' => [],
