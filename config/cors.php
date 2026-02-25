@@ -1,7 +1,7 @@
 <?php
-
 return [
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'sanctum/*', 'login', 'register'], 
+    'paths' => ['api/*', 'sanctum/*', 'sanctum/csrf-cookie', 'login', 'register'], 
+     
     'allowed_methods' => ['*'],
     'allowed_origins' => ['https://frontend-ong-puce.vercel.app'], 
     'allowed_origins_patterns' => [],
