@@ -17,48 +17,51 @@ class AuthController extends Controller
     /**
      * Inscription d'un nouvel utilisateur avec vérification PIN
      */
-    public function register(Request $request)
-    {
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6', // Azonao ampiana '|confirmed' raha misy input confirm_password
-            'pincode'  => 'required|string'
-        ]);
+    // AuthController.php
 
-        // Verification du code PIN (Mety kokoa raha avy amin'ny .env)
-        $validPin = "ADMIN2026"; 
+public function register(Request $request)
+{
+    // 1. Hamarino tsara ny validation
+    $request->validate([
+        'name'     => 'required|string|max:255',
+        'email'    => 'required|email|unique:users,email',
+        'password' => 'required|string|min:6',
+        'pincode'  => 'required|string'
+    ]);
 
-        if ($request->pincode !== $validPin) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Le Code PIN d\'autorisation est incorrect.'
-            ], 403);
-        }
-
-        try {
-            $user = User::create([
-                'name'     => $request->name,
-                'email'    => $request->email,
-                'password' => Hash::make($request->password),
-                'role'     => $request->role ?? 'user',
-            ]);
-
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Compte créé avec succès',
-                'user'    => $user
-            ], 201);
-
-        } catch (Exception $e) {
-            Log::error("Erreur lors de l'inscription: " . $e->getMessage());
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Une erreur interne est survenue lors de la création du compte.'
-            ], 500);
-        }
+    // 2. PIN Verification (ADMIN2026)
+    $validPin = "ADMIN2026"; 
+    if ($request->pincode !== $validPin) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Le Code PIN d\'autorisation est incorrect.'
+        ], 403);
     }
 
+    try {
+        // 3. Famoronana User
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => $request->role ?? 'user', // Ataovy azo antoka fa misy 'role' ny fillable ao amin'ny User Model
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Compte créé avec succès',
+            'user'    => $user
+        ], 201);
+
+    } catch (Exception $e) {
+        // Raha misy erreur ato, jereo ny Render Logs
+        Log::error("Erreur Inscription: " . $e->getMessage());
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Erreur: ' . $e->getMessage() // Ataovy mazava ny message aloha mba ho hitanao ny antony
+        ], 500);
+    }
+}
     /**
      * Connexion de l'utilisateur et génération de Token
      */
