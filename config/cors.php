@@ -1,12 +1,12 @@
 <?php
 
 return [
-        'paths' => ['api/*', 'sanctum/csrf-cookie'],
-        'allowed_methods' => ['*'],
-        'allowed_origins' => ['https://frontend-ong-puce.vercel.app'],
-        'allowed_origins_patterns' => [],
-        'allowed_headers' => ['*'],
-        'exposed_headers' => [],
-        'max_age' => 0,
-        'supports_credentials' => true, 
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'register'], // Ampio ny register/login eto
+    'allowed_methods' => ['*'],
+    'allowed_origins' => ['https://frontend-ong-puce.vercel.app'], // Hamarino tsara ny tsipelina
+    'allowed_origins_patterns' => [],
+    'allowed_headers' => ['*'],
+    'exposed_headers' => [],
+    'max_age' => 0,
+    'supports_credentials' => true, // Tsy maintsy true
 ];
