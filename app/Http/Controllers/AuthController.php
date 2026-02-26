@@ -1,69 +1,70 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Mail\ForgotPasswordMail;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
-
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class AuthController extends Controller
 {
     /**
      * Inscription d'un nouvel utilisateur avec vérification PIN
      */
-    // AuthController.php
-
-public function register(Request $request)
-{
-    // 1. Hamarino tsara ny validation
-    $request->validate([
-        'name'     => 'required|string|max:255',
-        'email'    => 'required|email|unique:users,email',
-        'password' => 'required|string|min:6',
-        'pincode'  => 'required|string'
-    ]);
-
-    // 2. PIN Verification (ADMIN2026)
-    $validPin = "ADMIN2026"; 
-    if ($request->pincode !== $validPin) {
-        return response()->json([
-            'status'  => 'error',
-            'message' => 'Le Code PIN d\'autorisation est incorrect.'
-        ], 403);
-    }
-
-    try {
-        // 3. Famoronana User
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role ?? 'user', // Ataovy azo antoka fa misy 'role' ny fillable ao amin'ny User Model
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'pincode'  => 'required|string'
         ]);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Compte créé avec succès',
-            'user'    => $user
-        ], 201);
+        // PIN Verification (ADMIN2026)
+        $validPin = "ADMIN2026"; 
+        if ($request->pincode !== $validPin) {
+            return response()->json([
+                'message' => 'Le Code PIN d\'autorisation est incorrect.'
+            ], 403);
+        }
 
-    } catch (Exception $e) {
-        // Raha misy erreur ato, jereo ny Render Logs
-        Log::error("Erreur Inscription: " . $e->getMessage());
-        return response()->json([
-            'status'  => 'error',
-            'message' => 'Erreur: ' . $e->getMessage() // Ataovy mazava ny message aloha mba ho hitanao ny antony
-        ], 500);
+        try {
+            $user = User::create([
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'password' => Hash::make($request->password),
+                'role'     => $request->role ?? 'user',
+            ]);
+
+            // ✅ FRONTEND COMPATIBLE
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'token' => $token,
+                'user'  => [
+                    'id'    => $user->id,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                    'role'  => $user->role,
+                    'photo' => $user->photo
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error("Erreur Inscription: " . $e->getMessage());
+            return response()->json([
+                'message' => 'Erreur lors de l\'inscription'
+            ], 500);
+        }
     }
-}
+
     /**
-     * Connexion de l'utilisateur et génération de Token
+     * Connexion - FRONTEND COMPATIBLE {token, user}
      */
     public function login(Request $request)
     {
@@ -74,90 +75,81 @@ public function register(Request $request)
 
         if (!Auth::attempt($credentials)) {
             return response()->json([
-                'status'  => 'error',
-                'message' => 'Identifiants incorrects. Veuillez réessayer.'
+                'message' => 'Email na mot de passe diso!'
             ], 401);
         }
 
         $user = Auth::user();
         
-        // Supprimer les anciens tokens pour éviter l'accumulation (Optionnel mais recommandé)
+        // Nettoyer anciens tokens
         $user->tokens()->delete();
-
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // ✅ FRONTEND EXPECT IO!
         return response()->json([
-            'status'     => 'success',
-            'message'    => 'Connexion réussie',
-            'user'       => $user,
-            'token'      => $token,
-            'token_type' => 'Bearer',
+            'token' => $token,
+            'user'  => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+                'role'  => $user->role ?? 'user',
+                'photo' => $user->photo
+            ]
         ], 200);
     }
 
     /**
-     * Déconnexion (Suppression des tokens)
+     * Déconnexion
      */
     public function logout(Request $request)
     {
         try {
-            // Supprime uniquement le token actuel
             $request->user()->currentAccessToken()->delete();
-
             return response()->json([
-                'status'  => 'success',
                 'message' => 'Déconnexion réussie'
             ]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
-                'status'  => 'error',
                 'message' => 'Erreur lors de la déconnexion'
             ], 500);
         }
     }
 
     /**
-     * Récupérer l'utilisateur authentifié
+     * Utilisateur connecté
      */
     public function me(Request $request)
     {
-        return response()->json([
-            'status' => 'success',
-            'user'   => $request->user()
-        ]);
+        return response()->json($request->user());
     }
 
-    // Any amin'ny AuthController.php
-
+    /**
+     * Mot de passe oublié
+     */
     public function forgotPassword(Request $request) 
-{
-    $request->validate(['email' => 'required|email']);
+    {
+        $request->validate(['email' => 'required|email']);
 
-    $user = \App\Models\User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-    if (!$user) {
-        return response()->json(['message' => 'Cette adresse email n\'existe pas.'], 404);
+        if (!$user) {
+            return response()->json(['message' => 'Email tsy misy!'], 404);
+        }
+
+        $newPassword = Str::random(12);
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        try {
+            Mail::to($user->email)->send(new ForgotPasswordMail($newPassword));
+            return response()->json([
+                'message' => 'Mot de passe vaovao voalaza tamin\'ny email!'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Forgot password email error: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Email tsy voalaza, fa password vaovao: ' . $newPassword
+            ]);
+        }
     }
-
-    // 1. Mamorona password vaovao
-    $newPassword = Str::random(40); 
-
-    // 2. Tehirizina ao amin'ny Database (Hashed)
-    $user->password = Hash::make($newPassword);
-    $user->save();
-
-    try {
-        // 3. Mandefa ny Email
-        Mail::to($user->email)->send(new ForgotPasswordMail($newPassword));
-        
-        return response()->json([
-            'message' => 'Un nouveau mot de passe a été envoyé à votre adresse email.'
-        ], 200);
-        
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Erreur lors de l\'envoi de l\'email: ' . $e->getMessage()
-        ], 500);
-    }
-}
 }
