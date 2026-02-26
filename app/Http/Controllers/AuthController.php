@@ -123,9 +123,6 @@ class AuthController extends Controller
         return response()->json($request->user());
     }
 
-    /**
-     * Mot de passe oublié
-     */
     public function forgotPassword(Request $request) 
     {
         $request->validate(['email' => 'required|email']);
