@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
 # 2. Mametraka ny Composer (TENA ILAINA)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Ampio ny a2enmod headers
+RUN a2enmod rewrite headers
 RUN a2enmod rewrite
 
 # 3. Adikao ny code

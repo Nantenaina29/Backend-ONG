@@ -5,7 +5,7 @@ use Laravel\Sanctum\Sanctum;
 return [
 
 
-'stateful' => [ 'frontend-ong-puce.vercel.app'],
+'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', 'frontend-ong-puce.vercel.app')),
 
     'guard' => ['web'],
 
