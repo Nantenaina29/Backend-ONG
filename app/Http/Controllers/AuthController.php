@@ -72,32 +72,32 @@ class AuthController extends Controller
             'email'    => 'required|email',
             'password' => 'required'
         ]);
-
+    
         if (!Auth::attempt($credentials)) {
             return response()->json([
                 'message' => 'Email na mot de passe diso!'
             ], 401);
         }
-
+    
         $user = Auth::user();
         
         // Nettoyer anciens tokens
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
-
-        // ✅ FRONTEND EXPECT IO!
+    
+        // 🚀 FRONTEND COMPATIBLE - TOKONY IO!
         return response()->json([
             'token' => $token,
-            'user'  => [
+            'user' => [
                 'id'    => $user->id,
                 'name'  => $user->name,
                 'email' => $user->email,
                 'role'  => $user->role ?? 'user',
-                'photo' => $user->photo
+                'photo' => $user->photo ?? null
             ]
-        ], 200);
+        ]);
     }
-
+    
     /**
      * Déconnexion
      */
