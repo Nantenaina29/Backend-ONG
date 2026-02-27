@@ -1,31 +1,33 @@
+# 1. Ampiasao ny PHP 8.2 miaraka amin'ny Apache
 FROM php:8.2-apache
 
-# Install system dependencies
+# 2. Mametraka ny extensions ilain'ny Laravel (PostgreSQL, GD, Zip, sns)
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
     libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     zip \
     unzip \
-    git \
-    && docker-php-ext-install pdo pdo_pgsql
+    libpq-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql
 
-# Configure Apache
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+# 3. Ampandehanina ny mod_rewrite an'ny Apache (Zava-dehibe amin'ny Routes sy CORS)
 RUN a2enmod rewrite
 
-# Copy project files
+# 4. Adikao ny kaody rehetra avy ao amin'ny folder-nao
 COPY . /var/www/html
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-RUN composer install --no-dev --optimize-autoloader
-
-# Set permissions for Laravel
+# 5. Omeo alalana ny folder Storage sy Cache (mba tsy hisy Error 500)
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Expose port 80
+# 6. Lazao amin'ny Apache fa ao amin'ny /public ny fidirana (DocumentRoot)
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# 7. Port 80 no ampiasain'ny Apache ao anaty container
 EXPOSE 80
 
-# Start command: Migrate and Start Apache
-CMD php artisan migrate --force && apache2-foreground
+# 8. Alefaso ny Apache
+CMD ["apache2-foreground"]
