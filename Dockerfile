@@ -30,4 +30,5 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.
 EXPOSE 80
 
 # 8. Alefaso ny Apache
-CMD ["apache2-foreground"]
+# Ovaina ho toy izao ny farany
+CMD php artisan migrate --force && apache2-foreground
