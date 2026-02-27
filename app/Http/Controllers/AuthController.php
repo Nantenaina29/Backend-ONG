@@ -73,31 +73,31 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
     
+        // Check credentials against the database
         if (!Auth::attempt($credentials)) {
             return response()->json([
-                'message' => 'Email na mot de passe diso!'
+                'message' => 'Invalid email or password.'
             ], 401);
         }
     
         $user = Auth::user();
         
-        // Nettoyer anciens tokens
+        // Revoke old tokens to maintain security
         $user->tokens()->delete();
         $token = $user->createToken('auth_token')->plainTextToken;
     
-        // 🚀 FRONTEND COMPATIBLE - TOKONY IO!
+        // Return consistent data structure
         return response()->json([
             'token' => $token,
-            'user' => [
+            'user'  => [
                 'id'    => $user->id,
                 'name'  => $user->name,
                 'email' => $user->email,
                 'role'  => $user->role ?? 'user',
                 'photo' => $user->photo ?? null
             ]
-        ]);
+        ], 200);
     }
-    
     /**
      * Déconnexion
      */
