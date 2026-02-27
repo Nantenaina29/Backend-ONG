@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Artisan;
 | PUBLIC AUTH ROUTES (No token required)
 |--------------------------------------------------------------------------
 */
-Route::post('/login', [AuthController::class, 'login']);           // Frontend: POST /api/login
+Route::post('/login', [AuthController::class, 'login'])->name('login');         // Frontend: POST /api/login
 Route::post('/register', [AuthController::class, 'register']);     // Frontend: POST /api/register
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']); // Frontend: POST /api/forgot-password
 
